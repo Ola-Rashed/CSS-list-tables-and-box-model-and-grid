@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS Grid – Lesson 3 explainer</title>
+<style>
+:root{--ink:#1d2433;--plum:#540242;--line:#f08c2e;--bg:#f4f6fb;--card:#fff;--mut:#5b6478}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif}
+header.top{background:var(--plum);color:#fff;padding:28px 24px}
+header.top h1{margin:0 0 4px;font-size:1.7rem}
+header.top p{margin:0;opacity:.85}
+.bar{margin-top:14px;font-size:.95rem}
+.wrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;display:flex;flex-direction:column;gap:2px;font-size:.92rem}
+nav a{color:var(--ink);text-decoration:none;padding:6px 10px;border-left:3px solid transparent}
+nav a:hover,nav a:focus-visible{border-left-color:var(--line);background:#fff}
+h2{margin:36px 0 6px;color:var(--plum);font-size:1.45rem}
+h2+p.lead{margin:0 0 16px;color:var(--mut)}
+.card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px;background:var(--card);border:1px solid #dfe3ee;border-radius:10px;padding:18px;margin:14px 0}
+.card h3{margin:0 0 6px;font-size:1.08rem}
+.card p{margin:0 0 10px}
+code{font-family:ui-monospace,Consolas,monospace;background:#eef0f7;padding:1px 5px;border-radius:4px;font-size:.88em}
+textarea.code{width:100%;background:#1d2433;color:#e8ecf5;border:0;border-radius:8px;padding:12px;font:13px/1.5 ui-monospace,Consolas,monospace;resize:vertical;tab-size:2;white-space:pre;overflow:auto}
+textarea.code:focus{outline:2px solid var(--line)}
+button{font:inherit;cursor:pointer}
+.rs{margin-top:6px;background:none;border:1px solid #c5cbdb;border-radius:6px;padding:3px 10px;font-size:.85rem;color:var(--mut)}
+.stage{position:relative;padding:26px 0 0 28px;min-width:0;overflow-x:auto;align-self:start}
+.ln{position:absolute;font:700 11px/18px system-ui;width:18px;height:18px;text-align:center;border-radius:50%;background:var(--line);color:#fff;font-style:normal;z-index:2}
+.ln.c{top:2px;transform:translateX(-50%)}
+.ln.r{left:2px;transform:translateY(-50%)}
+.host *{margin:0;padding:0;box-sizing:border-box}
+.host .box{background:#bfdbfe;border:1px solid #60a5fa;padding:.6rem;text-align:center;border-radius:8px;font-weight:600;color:#1e40af;font-size:.85rem}
+.host h1{font-size:1.4rem}.host h3{font-size:.95rem}.host h4{font-size:.8rem}.host p{font-size:.75rem}
+.q{padding:12px 0;border-top:1px solid #e6e9f2}
+.q .o{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.q .o button{background:#fff;border:1px solid #c5cbdb;border-radius:8px;padding:5px 12px;text-align:left}
+.q .o button.ok{background:#dcfce7;border-color:#16a34a}
+.q .o button.no{background:#fee2e2;border-color:#dc2626}
+.q small{display:block;color:var(--mut)}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:8px 18px;margin:0}
+dt{font-weight:700}dd{margin:0}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}nav{display:none}.card{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>CSS Grid: line placement, span and template areas</h1>
+  <p>Lesson 3. Every code box is live: edit it and the grid next to it updates.</p>
+  <label class="bar"><input type="checkbox" id="ln" checked> Show grid line numbers (orange badges)</label>
+</header>
+<div class="wrap">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+<script>
+const g=(c,o={})=>`.grid {
+  display: grid;
+  grid-template-columns: ${c};
+  grid-auto-rows: ${o.r||'minmax(48px, auto)'};${o.x?'\n  '+o.x:''}
+  gap: 10px;
+  padding: 10px;
+  background: #ede9fe;
+  border: 1px solid #a78bfa;
+  border-radius: 8px;
+}
+`;
+const T='repeat(4, 1fr)';
+const art=(c,t)=>`<article class="${c}"><h3>${t}</h3><p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente quasi eaque molestias obcaecati culpa asperiores iure.</p></article>`;
+const SCHOOL=`<div class="container"><header class="header"><h1>We School</h1></header><section class="about"><h3>About</h3><p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia quo, possimus voluptatibus ipsa tempora suscipit ratione natus eaque.</p></section>${art('programming','Programming')}${art('networking','Networking')}${art('communication','Communication')}<footer class="footer"><h4>We Schools</h4></footer></div>`;
+const RULES=`.header { grid-area: header; background: #540242; color: white; text-align: center; padding: 20px; }
+.about { grid-area: about; padding: 20px; background: #fef3c7; color: #78350f; }
+.programming { grid-area: programming; padding: 20px; background: #dbeafe; color: #1e40af; }
+.networking { grid-area: networking; padding: 20px; background: #fee2e2; color: #991b1b; }
+.communication { grid-area: communication; padding: 20px; background: #dcfce7; color: #166534; }
+.footer { grid-area: footer; background: #540242; color: white; text-align: center; padding: 20px; }`;
+const lab=i=>`R${Math.floor((i-1)/3)+1} · C${(i-1)%3+1}`;
+const E=[
+{h:'Section 1: Grid line-based placement',l:'Grid lines are the numbered dividers of the grid. Items are placed by saying which lines they start and end at.'},
+{t:'1-1 Grid lines and tracks',p:'A grid with 3 columns has <b>4 column lines</b>; 3 rows have <b>4 row lines</b>. A <b>track</b> is the space between two neighbouring lines. Lines are numbered from <b>1</b>, not 0. Tracks can be fixed (<code>px</code>) or flexible (<code>fr</code>, <code>auto</code>).',n:9,lab,
+ css:g('120px 1fr 80px',{r:'auto',x:'grid-template-rows: 50px 1fr 80px;\n  height: 240px;'})},
+{t:'1-2 Placing items with line numbers',p:'Use <code>grid-row-start/end</code> and <code>grid-column-start/end</code>. Box 1 starts at row line 1 / column line 1 and ends at line 2 / 2. Box 2 goes from row line 3 to 4 and column line 2 to 4.',n:2,
+ css:g('120px 1fr 80px',{r:'auto',x:'grid-template-rows: 50px 1fr 80px;\n  height: 240px;'})+`.box1 {
+  grid-row-start: 1;    grid-row-end: 2;
+  grid-column-start: 1; grid-column-end: 2;
+}
+.box2 {
+  grid-row-start: 3;    grid-row-end: 4;
+  grid-column-start: 2; grid-column-end: 4;
+}`},
+{t:'Activity 1: build the base grid',p:'12 boxes, 4 equal columns made with <code>repeat(4, 1fr)</code>, rows at least 100px tall using <code>minmax()</code>, and a 10px <code>gap</code>.',n:12,css:g(T,{r:'minmax(60px, auto)'})},
+{t:'Activity 2: grid-column',p:'Columns run left to right, so this stretches boxes <b>horizontally</b>. Box 1 goes from column line 1 to 5 (all 4 columns), box 2 from 1 to 4. <code>grid-column: 1 / 5</code> is the shorthand.',n:12,
+ css:g(T)+`.box1 {
+  grid-column-start: 1; grid-column-end: 5;
+  /* shorthand: grid-column: 1 / 5; */
+}
+.box2 {
+  grid-column: 1 / 4;
+}`},
+{t:'Activity 3: grid-row',p:'Rows run top to bottom, so this stretches boxes <b>vertically</b>. Box 1 covers row lines 1 to 3 (2 rows), box 2 covers 1 to 4 (3 rows).',n:12,
+ css:g(T)+`.box1 {
+  grid-row-start: 1; grid-row-end: 3;
+  /* shorthand: grid-row: 1 / 3; */
+}
+.box2 {
+  grid-row: 1 / 4;
+}`},
+{t:'Activity 4: move box 1',p:'Combine both shorthands to put Box 1 in row 3 across columns 3 and 4. The other boxes flow around it automatically.',n:12,
+ css:g(T)+`.box1 {
+  grid-column: 3 / 5;
+  grid-row: 3 / 4;
+}`},
+{h:'Section 2: Grid span',l:'Instead of an end line, write <code>span N</code> to say how many tracks the item covers.'},
+{t:'2-1 Spanning columns',p:'<code>grid-column: start / span count</code>. Box 1 starts at line 1 and spans 3 columns.',n:16,
+ css:g(T)+`.box:first-child {
+  grid-column: 1 / span 3;
+}`},
+{t:'2-2 Spanning rows',p:'<code>grid-row</code> works the same vertically. Box 1 now spans 3 columns and 2 rows.',n:16,
+ css:g(T)+`.box:first-child {
+  grid-column: 1 / span 3;
+  grid-row: 1 / span 2;
+}`},
+{t:'2-3 Targeting items with :nth-child()',p:'Any item can be picked with <code>:nth-child(n)</code>. Box 5 starts at column line 2 and spans 3 columns, and starts at row line 3 and spans 2 rows.',n:16,
+ css:g(T)+`.box:first-child {
+  grid-column: 1 / span 3;
+  grid-row: 1 / span 2;
+}
+.box:nth-child(5) {
+  grid-column: 2 / span 3;
+  grid-row: 3 / span 2;
+}`},
+{t:'Activity: leave an empty cell (offset)',p:'Box 1 starts at column line 2 and spans 3 columns, so column 1 of the first row stays empty. (Starting at line 2 and spanning 5 would create extra columns, so use span 3 or <code>2 / 5</code>.)',n:16,
+ css:g(T)+`.box:first-child {
+  grid-column: 2 / span 3;
+}`},
+{t:'Activity: span with explicit lines',p:'Box 7 starts at column line 2 and row line 3. Two ways: <code>span</code> (item auto-placed) or explicit lines (exact position). Try swapping them.',n:16,
+ css:g(T)+`.box:first-child {
+  grid-column: 2 / 5;
+}
+.box:nth-child(7) {
+  grid-column: 2 / 5;
+  grid-row: 3 / 5;
+  /* auto-placed alternative:
+     grid-column: span 3;
+     grid-row: span 2; */
+}`},
+{h:'Section 3: Grid template areas',l:'Name the areas in the container, then give each item its area. Each quoted string is one row; repeating a name spans it; a dot <code>.</code> is an empty cell.'},
+{t:'3-2 Example 1: header, about, three articles, footer',p:'Header and about span all 3 columns. The three articles each take one column in row 3. The footer spans all columns. Each child gets its place with <code>grid-area: name</code>.',html:SCHOOL,
+ css:`.container {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "about about about"
+    "programming networking communication"
+    "footer footer footer";
+}
+`+RULES},
+{t:'3-3 Example 2: change the layout by editing the strings',p:'Only the container changes (colour rules are the same as before). Programming now fills row 3. In row 4, networking takes two thirds and communication one third. Try replacing a name with a dot.',html:SCHOOL,base:RULES,
+ css:`.container {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "about about about"
+    "programming programming programming"
+    "networking networking communication"
+    "footer footer footer";
+}`}
+];
+const TERMS=[['Grid lines','The horizontal and vertical dividing lines, numbered from 1.'],['Grid tracks','The space between two adjacent lines (a column or a row).'],['fr unit','A fraction of the free space, for flexible tracks.'],['Grid container','The parent with display: grid.'],['Grid item','A direct child of the grid container.'],['grid-column','Shorthand for grid-column-start and grid-column-end.'],['grid-row','Shorthand for grid-row-start and grid-row-end.'],['span','Keyword that makes an item cover several tracks.'],['grid-template-areas','Maps the layout visually with named areas.'],['gap','The space between tracks (formerly grid-gap).']];
+const TF=['True','False'];
+const Q=[
+[41,'Grid lines are numbered starting from 0.',TF,1,'They start at 1.'],
+[42,'<code>grid-column: span 2</code> makes an item span 2 columns.',TF,0,'Correct.'],
+[43,'<code>grid-template-areas</code> uses commas to separate rows.',TF,1,'Each row is a quoted string; no commas.'],
+[44,'<code>fr</code> units can be used for rows and columns.',TF,0,'Correct, in both template-columns and template-rows.'],
+[45,'<code>align-items</code> works on the main axis.',TF,1,'In grid it aligns items on the block (vertical) axis inside their cell; justify-items does the inline axis.'],
+[46,'<code>grid-auto-rows</code> sets default row sizes.',TF,0,'Correct, for rows created automatically.'],
+[47,'A dot (.) in <code>grid-template-areas</code> means a named area.',TF,1,'A dot means an empty cell.'],
+[48,'<code>grid-row: 1 / -1</code> spans all rows.',TF,0,'-1 is the last line, so it spans every explicit row.'],
+[49,'<code>grid-template-areas</code> must cover every cell.',TF,1,'Not with names: use dots for empty cells. Every row must have the same number of cells.'],
+[50,'<code>place-items</code> combines justify-items and align-items.',TF,0,'Correct.'],
+[51,'What does <code>grid-template-areas</code> define?',['The gap between grid items','The names of grid lines','A visual layout using named areas','The number of rows and columns'],2,'A visual layout using named areas.'],
+[52,'How do you represent an empty cell in grid-template-areas?',['empty','null','. (dot)','(space)'],2,'A dot.'],
+[53,'Which property assigns a grid item to a named area?',['grid-name','grid-area','grid-template','grid-cell'],1,'<code>grid-area</code>.'],
+[54,'How does the header span all columns?',['grid-template-areas: "header header header";','grid-template-areas: "header . .";','grid-template-areas: "header";','grid-template-areas: repeat(3, "header");'],0,'Repeat the name once per column.'],
+[55,'What does <code>grid-template-areas: "a b c" "d e f";</code> create?',['A 3x2 grid with named areas','A 2x3 grid with named areas','A 3-column grid with 6 areas','A grid with 6 rows'],1,'2 rows x 3 columns (6 named areas). Option c is also close, but b states the rows x columns shape.'],
+[56,'How do you assign an item to the "footer" area?',['.item { grid-template: footer; }','.item { grid-area: footer; }','.item { grid-name: footer; }','.item { grid-cell: footer; }'],1,'<code>grid-area: footer</code>.'],
+[57,'What does <code>grid-row: span 2;</code> do?',['Spans the item across 2 columns','Spans the item across 2 rows','Moves the item 2 rows down','Limits the item to 2 rows'],1,'It spans 2 rows.'],
+[58,'Which property controls the size of grid tracks?',['grid-gap','grid-template-columns','grid-line-size','grid-span'],1,'<code>grid-template-columns</code> (and -rows).'],
+[59,'What does <code>grid-auto-rows: minmax(100px, auto);</code> do?',['Sets rows to a fixed height of 100px','Allows rows to shrink below 100px','Sets a minimum row height of 100px but allows expansion','Disables row resizing'],2,'Minimum 100px, grows with content.'],
+[60,'How would you span from row line 2 to row line 4?',['grid-row: 2 / 4','grid-column: 2 / 4','grid-area: 2 / 4','grid-line: 2-4'],0,'<code>grid-row: 2 / 4</code>.']
+];
+const main=document.getElementById('main'),nav=document.getElementById('nav'),cb=document.getElementById('ln'),draws=[];
+const link=(id,t)=>{const a=document.createElement('a');a.href='#'+id;a.textContent=t;nav.append(a)};
+let k=0,sec=0;
+E.forEach(e=>{
+  if(e.h){sec++;main.insertAdjacentHTML('beforeend',`<h2 id="s${sec}">${e.h}</h2><p class="lead">${e.l}</p>`);link('s'+sec,e.h.replace(/^Section \d: /,'')); return}
+  const i=++k,c=document.createElement('section');c.className='card';
+  const inner=e.html||`<div class="grid">${Array.from({length:e.n},(_,j)=>`<div class="box box${j+1}">${e.lab?e.lab(j+1):j+1}</div>`).join('')}</div>`;
+  c.innerHTML=`<div><h3>${e.t}</h3><p>${e.p}</p><textarea class="code" spellcheck="false" rows="${e.css.split('\n').length}"></textarea><button class="rs">Reset code</button></div><div class="stage"><style></style><div class="host" id="h${i}">${inner}</div></div>`;
+  main.append(c);
+  const ta=c.querySelector('textarea'),st=c.querySelector('style'),stage=c.querySelector('.stage'),host=c.querySelector('.host');
+  ta.value=e.css;
+  const draw=()=>{
+    stage.querySelectorAll('.ln').forEach(n=>n.remove());
+    const gr=host.firstElementChild,cs=getComputedStyle(gr);
+    if(!cb.checked||cs.display!=='grid')return;
+    const P=v=>parseFloat(v)||0,mk=(t,pos,n)=>{const b=document.createElement('i');b.className='ln '+t;b.textContent=n;b.style[t=='c'?'left':'top']=pos+'px';stage.append(b)};
+    const axis=(tpl,gap,start,t)=>{let x=start;const a=tpl.split(' ').map(P);a.forEach((w,j)=>{mk(t,x,j+1);x+=w+gap});mk(t,x-gap,a.length+1)};
+    axis(cs.gridTemplateColumns,P(cs.columnGap),gr.offsetLeft+P(cs.paddingLeft)+P(cs.borderLeftWidth),'c');
+    axis(cs.gridTemplateRows,P(cs.rowGap),gr.offsetTop+P(cs.paddingTop)+P(cs.borderTopWidth),'r');
+  };
+  const apply=()=>{st.textContent=`#h${i}{${e.base||''}\n${ta.value}}`;draw()};
+  ta.addEventListener('input',apply);
+  c.querySelector('.rs').onclick=()=>{ta.value=e.css;apply()};
+  new ResizeObserver(draw).observe(host);
+  draws.push(draw);apply();
+});
+cb.onchange=()=>draws.forEach(d=>d());
+// Terminology
+main.insertAdjacentHTML('beforeend',`<h2 id="terms">Terminology</h2><div class="card" style="display:block"><dl>${TERMS.map(t=>`<dt>${t[0]}</dt><dd>${t[1]}</dd>`).join('')}</dl></div>`);link('terms','Terminology');
+// Quiz
+main.insertAdjacentHTML('beforeend','<h2 id="quiz">Do I know this already?</h2><p class="lead">Tap an answer to check it. Questions 41 to 50 are True/False, 51 to 60 are multiple choice.</p><div class="card" id="qs" style="display:block"></div>');link('quiz','Check yourself');
+const qs=document.getElementById('qs');
+Q.forEach(q=>{
+  const d=document.createElement('div');d.className='q';
+  d.innerHTML=`<b>${q[0]}.</b> ${q[1]}<div class="o"></div><small></small>`;
+  const o=d.querySelector('.o'),s=d.querySelector('small');let done=false;
+  q[2].forEach((t,j)=>{const b=document.createElement('button');b.innerHTML=(q[2]===TF?'':'abcd'[j]+') ')+t.replace(/</g,'&lt;');
+    b.onclick=()=>{if(done)return;done=true;b.classList.add(j===q[3]?'ok':'no');o.children[q[3]].classList.add('ok');s.innerHTML=(j===q[3]?'Correct. ':'Not quite. ')+q[4]};o.append(b)});
+  qs.append(d);
+});
+</script>
+</body>
+</html>
